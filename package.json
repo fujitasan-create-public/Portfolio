@@ -9,9 +9,26 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@appletosolutions/reactbits": "^1.0.3",
     "@astrojs/react": "^4.2.0",
+    "@chakra-ui/react": "^3.34.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.0",
+    "@react-three/postprocessing": "^3.0.4",
+    "@react-three/rapier": "^2.2.0",
     "astro": "^5.7.7",
+    "framer-motion": "^12.38.0",
+    "gl-matrix": "^3.4.4",
+    "gsap": "^3.15.0",
+    "matter-js": "^0.20.0",
+    "meshline": "^3.3.1",
+    "ogl": "^1.0.11",
+    "postprocessing": "^6.39.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "three": "^0.184.0",
+    "three-stdlib": "^2.36.1"
   }
 }

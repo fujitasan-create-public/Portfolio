@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Aurora, particles as Particles } from "@appletosolutions/reactbits";
 
 type IntroSplashProps = {
   title?: string;
@@ -24,13 +25,36 @@ export default function IntroSplash({
 
   return (
     <div className={`scene ${completed ? "scene-done" : ""}`}>
-      <div className="bg-orbs" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-      </div>
+      <div className="top-page-shell" aria-hidden="true">
+        <div className="rb-space-base">
+          <div className="rb-aurora">
+            <Aurora
+              colorStops={["#3a29ff", "#5e8bff", "#44e7ff"]}
+              amplitude={1}
+              blend={0.55}
+              speed={0.45}
+            />
+          </div>
 
-      <div className="top-page-shell" />
+          <div className="rb-stars">
+            <Particles
+              particleCount={600}
+              particleSpread={16}
+              speed={0.07}
+              particleColors={["#f7fbff", "#cde7ff", "#8ec5ff"]}
+              moveParticlesOnHover={false}
+              particleHoverFactor={1}
+              alphaParticles
+              particleBaseSize={30}
+              sizeRandomness={0.9}
+              cameraDistance={22}
+              disableRotation={false}
+            />
+          </div>
+
+          <div className="rb-vignette" />
+        </div>
+      </div>
 
       <section className="intro-layer" aria-label="Intro Animation">
         <h1 className="intro-title">
