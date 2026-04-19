@@ -13,7 +13,8 @@ export default function IntroSplash({
   durationMs = 2600
 }: IntroSplashProps) {
   const [completed, setCompleted] = useState(false);
-  const letters = useMemo(() => title.split(""), [title]);
+  const displayTitle = useMemo(() => title, [title]);
+  const letters = useMemo(() => displayTitle.split(""), [displayTitle]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -74,18 +75,19 @@ export default function IntroSplash({
         </div>
       </div>
 
+      <h1 className={`intro-title intro-title-floating ${completed ? "title-docked" : ""}`}>
+        {letters.map((char, index) => (
+          <span
+            key={`${char}-${index}`}
+            style={{ animationDelay: `${index * 0.06}s` }}
+            className={char === " " ? "space" : ""}
+          >
+            {char}
+          </span>
+        ))}
+      </h1>
+
       <section className="intro-layer" aria-label="Intro Animation">
-        <h1 className="intro-title">
-          {letters.map((char, index) => (
-            <span
-              key={`${char}-${index}`}
-              style={{ animationDelay: `${index * 0.06}s` }}
-              className={char === " " ? "space" : ""}
-            >
-              {char}
-            </span>
-          ))}
-        </h1>
       </section>
     </div>
   );
