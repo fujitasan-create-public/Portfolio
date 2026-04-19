@@ -37,19 +37,37 @@ export default function IntroSplash({
           </div>
 
           <div className="rb-stars">
-            <Particles
-              particleCount={600}
-              particleSpread={16}
-              speed={0.07}
-              particleColors={["#f7fbff", "#cde7ff", "#8ec5ff"]}
-              moveParticlesOnHover={false}
-              particleHoverFactor={1}
-              alphaParticles
-              particleBaseSize={30}
-              sizeRandomness={0.9}
-              cameraDistance={22}
-              disableRotation={false}
-            />
+            <div className="rb-stars-core">
+              <Particles
+                particleCount={600}
+                particleSpread={16}
+                speed={0.07}
+                particleColors={["#f7fbff", "#cde7ff", "#8ec5ff"]}
+                moveParticlesOnHover={false}
+                particleHoverFactor={1}
+                alphaParticles
+                particleBaseSize={58}
+                sizeRandomness={0.9}
+                cameraDistance={22}
+                disableRotation={false}
+              />
+            </div>
+
+            <div className="rb-stars-glow">
+              <Particles
+                particleCount={260}
+                particleSpread={15}
+                speed={0.05}
+                particleColors={["#ffffff", "#e7f3ff", "#9fd2ff"]}
+                moveParticlesOnHover={false}
+                particleHoverFactor={1}
+                alphaParticles
+                particleBaseSize={128}
+                sizeRandomness={0.8}
+                cameraDistance={24}
+                disableRotation={false}
+              />
+            </div>
           </div>
 
           <div className="rb-vignette" />
