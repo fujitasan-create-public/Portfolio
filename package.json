@@ -1,0 +1,17 @@
+{
+  "name": "fujita-create-portfolio",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.2.0",
+    "astro": "^5.7.7",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}
