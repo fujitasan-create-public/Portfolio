@@ -46,9 +46,9 @@ export default function IntroSplash({
                 moveParticlesOnHover={false}
                 particleHoverFactor={1}
                 alphaParticles
-                particleBaseSize={58}
-                sizeRandomness={0.9}
-                cameraDistance={22}
+                particleBaseSize={40}
+                sizeRandomness={0.35}
+                cameraDistance={26}
                 disableRotation={false}
               />
             </div>
@@ -62,9 +62,9 @@ export default function IntroSplash({
                 moveParticlesOnHover={false}
                 particleHoverFactor={1}
                 alphaParticles
-                particleBaseSize={128}
-                sizeRandomness={0.8}
-                cameraDistance={24}
+                particleBaseSize={52}
+                sizeRandomness={0.25}
+                cameraDistance={30}
                 disableRotation={false}
               />
             </div>
