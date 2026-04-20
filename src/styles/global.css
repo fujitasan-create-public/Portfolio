@@ -533,6 +533,7 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.05em;
+  color: #f8fbff;
   font-weight: 700;
   font-size: clamp(1.9rem, 5vw, 4.8rem);
   line-height: 1.12;
@@ -541,7 +542,7 @@ body {
 
 .intro-title-floating {
   position: absolute;
-  z-index: 3;
+  z-index: 6;
   font-family: "Orbitron", "Space Grotesk", "Segoe UI", sans-serif;
   font-weight: 700;
   left: 50%;
@@ -555,7 +556,7 @@ body {
     letter-spacing 1s cubic-bezier(0.22, 1, 0.36, 1),
     padding 1s cubic-bezier(0.22, 1, 0.36, 1),
     text-shadow 0.8s ease;
-  text-shadow: 0 10px 36px rgba(0, 0, 0, 0.48), 0 0 28px rgba(148, 215, 255, 0.3);
+  text-shadow: 0 10px 36px rgba(0, 0, 0, 0.48), 0 0 32px rgba(177, 226, 255, 0.42), 0 0 6px rgba(255, 255, 255, 0.55);
 }
 
 .scene-done .intro-title-floating.title-docked {

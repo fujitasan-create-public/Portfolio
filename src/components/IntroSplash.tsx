@@ -48,7 +48,12 @@ export default function IntroSplash({
       antialias: true
     });
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const lowPowerDevice =
+      (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency <= 6) ||
+      (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 6);
+    const qualityScale = lowPowerDevice ? 0.72 : 1;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPowerDevice ? 1.25 : 1.6));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.28;
@@ -58,6 +63,7 @@ export default function IntroSplash({
     const orbitPivots: THREE.Object3D[] = [];
     const orbitSpeeds: number[] = [];
     const spinMeshes: Array<{ mesh: THREE.Mesh; speed: number }> = [];
+    const driftingGroups: Array<{ obj: THREE.Object3D; speed: number }> = [];
 
     const root = new THREE.Group();
     root.rotation.x = -0.2;
@@ -97,6 +103,7 @@ export default function IntroSplash({
     };
 
     const glowTexture = makeGlowTexture();
+    const starTexture = makeGlowTexture();
 
     const addGlow = (parent: THREE.Object3D, size: number, color: string, opacity: number) => {
       if (!glowTexture) {
@@ -116,6 +123,166 @@ export default function IntroSplash({
       disposables.push(mat);
     };
 
+    const makeCloudTexture = () => {
+      const c = document.createElement("canvas");
+      c.width = 1024;
+      c.height = 1024;
+      const ctx = c.getContext("2d");
+      if (!ctx) {
+        return null;
+      }
+      ctx.clearRect(0, 0, c.width, c.height);
+
+      for (let i = 0; i < 180; i += 1) {
+        const x = Math.random() * c.width;
+        const y = Math.random() * c.height;
+        const r = 30 + Math.random() * 170;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        const alpha = 0.02 + Math.random() * 0.06;
+        g.addColorStop(0, `rgba(255,255,255,${alpha})`);
+        g.addColorStop(0.45, `rgba(255,220,170,${alpha * 0.55})`);
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      disposables.push(tex);
+      return tex;
+    };
+
+    const addMilkyWayHaze = () => {
+      const cloudTexture = makeCloudTexture();
+      if (!cloudTexture) {
+        return;
+      }
+
+      const hazeGroup = new THREE.Group();
+      hazeGroup.position.set(0, -2.4, -26);
+      hazeGroup.rotation.x = -0.78;
+      hazeGroup.rotation.z = -0.18;
+      scene.add(hazeGroup);
+      driftingGroups.push({ obj: hazeGroup, speed: 0.00022 });
+
+      const palette = ["#f5d8b5", "#d5c2ff", "#c8dbff", "#e6d0b6", "#b5c8ff"];
+      for (let i = 0; i < 22; i += 1) {
+        const mat = new THREE.SpriteMaterial({
+          map: cloudTexture,
+          color: new THREE.Color(palette[i % palette.length]),
+          transparent: true,
+          opacity: 0.08 + Math.random() * 0.08,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        });
+        const sprite = new THREE.Sprite(mat);
+        sprite.position.set((Math.random() - 0.5) * 90, (Math.random() - 0.5) * 9, (Math.random() - 0.5) * 15);
+        const s = 18 + Math.random() * 26;
+        sprite.scale.set(s, s * (0.7 + Math.random() * 0.5), 1);
+        hazeGroup.add(sprite);
+        disposables.push(mat);
+      }
+    };
+
+    const addStarFields = () => {
+      const makeField = (
+        count: number,
+        spread: number,
+        color: string,
+        size: number,
+        opacity: number,
+        rotation: THREE.Euler
+      ) => {
+        const positions = new Float32Array(count * 3);
+        for (let i = 0; i < count; i += 1) {
+          const r = spread * (0.35 + Math.random() * 0.65);
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+          positions[i * 3 + 1] = r * Math.cos(phi);
+          positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({
+          color,
+          size,
+          transparent: true,
+          opacity,
+          map: starTexture ?? undefined,
+          alphaTest: 0.02,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const points = new THREE.Points(geometry, material);
+        points.rotation.copy(rotation);
+        scene.add(points);
+        driftingGroups.push({ obj: points, speed: 0.00012 + Math.random() * 0.00014 });
+        disposables.push(geometry, material);
+      };
+
+      makeField(Math.floor(12000 * qualityScale), 260, "#b7d9ff", 0.11, 0.86, new THREE.Euler(0, 0, 0));
+      makeField(Math.floor(9000 * qualityScale), 210, "#f1f2ff", 0.09, 0.66, new THREE.Euler(0.16, 0.08, 0));
+      makeField(Math.floor(4200 * qualityScale), 156, "#8ea8ff", 0.13, 0.52, new THREE.Euler(-0.2, 0.14, 0.1));
+      makeField(Math.floor(7000 * qualityScale), 280, "#ffffff", 0.06, 0.38, new THREE.Euler(-0.04, -0.05, 0.02));
+    };
+
+    const addGalaxyBand = () => {
+      const arms = 4;
+      const pointsCount = Math.floor(26000 * qualityScale);
+      const galaxyRadius = 48;
+      const spin = 2.7;
+      const randomness = 2.8;
+
+      const positions = new Float32Array(pointsCount * 3);
+      const colors = new Float32Array(pointsCount * 3);
+      const inside = new THREE.Color("#f6ddc2");
+      const mid = new THREE.Color("#bfb9ff");
+      const outside = new THREE.Color("#d4e0ff");
+
+      for (let i = 0; i < pointsCount; i += 1) {
+        const i3 = i * 3;
+        const radius = Math.random() * galaxyRadius;
+        const armAngle = ((i % arms) / arms) * Math.PI * 2;
+        const spinAngle = radius * spin * 0.08;
+        const randomX = (Math.random() - 0.5) * randomness * (1 + radius * 0.035);
+        const randomY = (Math.random() - 0.5) * randomness * 0.16;
+        const randomZ = (Math.random() - 0.5) * randomness * (1 + radius * 0.035);
+
+        positions[i3] = Math.cos(armAngle + spinAngle) * radius + randomX;
+        positions[i3 + 1] = randomY;
+        positions[i3 + 2] = Math.sin(armAngle + spinAngle) * radius + randomZ;
+
+        const mixColor = inside.clone().lerp(mid, radius / galaxyRadius).lerp(outside, (radius / galaxyRadius) ** 2);
+        colors[i3] = mixColor.r;
+        colors[i3 + 1] = mixColor.g;
+        colors[i3 + 2] = mixColor.b;
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.14,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.84,
+        blending: THREE.AdditiveBlending,
+        map: starTexture ?? undefined,
+        alphaTest: 0.02,
+        depthWrite: false
+      });
+
+      const galaxy = new THREE.Points(geometry, material);
+      galaxy.position.set(0, -3.2, -24);
+      galaxy.rotation.x = -0.82;
+      scene.add(galaxy);
+      driftingGroups.push({ obj: galaxy, speed: 0.00045 });
+      disposables.push(geometry, material);
+    };
+
     const sunGeometry = new THREE.SphereGeometry(2.0, 128, 128);
     const sunMaterial = new THREE.MeshStandardMaterial({
       map: makeTexture("/img/sun.jpg"),
@@ -130,6 +297,9 @@ export default function IntroSplash({
     spinMeshes.push({ mesh: sun, speed: 0.0019 });
     addGlow(sun, 6.8, "#ffb366", 0.9);
     addGlow(sun, 9.4, "#ff8d4a", 0.5);
+    addStarFields();
+    addGalaxyBand();
+    addMilkyWayHaze();
 
     const orbitDistances: number[] = [];
 
@@ -310,6 +480,9 @@ export default function IntroSplash({
       }
       for (const { mesh, speed } of spinMeshes) {
         mesh.rotation.y += speed;
+      }
+      for (const { obj, speed } of driftingGroups) {
+        obj.rotation.y += speed;
       }
       renderer.render(scene, camera);
       rafId = window.requestAnimationFrame(animate);
