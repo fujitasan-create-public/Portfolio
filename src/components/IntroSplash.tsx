@@ -8,15 +8,26 @@ type IntroSplashProps = {
 };
 
 const DEFAULT_TITLE = "Fujita-create Portfolio";
-const SECTION_ITEMS = ["Home", "Skills", "Works", "Contacts"] as const;
-type Section = (typeof SECTION_ITEMS)[number];
+const SECTION_KEYS = ["home", "skills", "works", "news", "contacts"] as const;
+type SectionKey = (typeof SECTION_KEYS)[number];
+type Language = "ja" | "en";
+const SECTION_LABELS: Record<SectionKey, string> = {
+  home: "Home",
+  skills: "Skills",
+  works: "Works",
+  news: "News",
+  contacts: "Contacts"
+};
 
 export default function IntroSplash({
   title = DEFAULT_TITLE,
   durationMs = 2600
 }: IntroSplashProps) {
   const [completed, setCompleted] = useState(false);
-  const [activeSection, setActiveSection] = useState<Section>("Home");
+  const [showUi, setShowUi] = useState(false);
+  const [hasOpenedGlass, setHasOpenedGlass] = useState(false);
+  const [language, setLanguage] = useState<Language>("ja");
+  const [activeSection, setActiveSection] = useState<SectionKey>("home");
   const earthHostRef = useRef<HTMLDivElement | null>(null);
   const earthCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const displayTitle = useMemo(() => title, [title]);
@@ -29,6 +40,19 @@ export default function IntroSplash({
 
     return () => window.clearTimeout(timer);
   }, [durationMs]);
+
+  useEffect(() => {
+    if (!completed) {
+      setShowUi(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowUi(true);
+    }, 720);
+
+    return () => window.clearTimeout(timer);
+  }, [completed]);
 
   useEffect(() => {
     const host = earthHostRef.current;
@@ -503,7 +527,7 @@ export default function IntroSplash({
   }, []);
 
   return (
-    <div className={`scene ${completed ? "scene-done" : ""}`}>
+    <div className={`scene ${completed ? "scene-done" : ""} ${showUi ? "ui-visible" : ""}`}>
       <div className="top-page-shell" aria-hidden="true">
         <div className="rb-space-base">
           <div className="rb-aurora">
@@ -561,7 +585,19 @@ export default function IntroSplash({
         </div>
       </div>
 
-      <h1 className={`intro-title intro-title-floating ${completed ? "title-docked" : ""}`}>
+      <h1
+        className={`intro-title intro-title-floating ${completed ? "title-docked" : ""}`}
+        role="button"
+        tabIndex={0}
+        aria-label="Reload page"
+        onClick={() => window.location.reload()}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            window.location.reload();
+          }
+        }}
+      >
         {letters.map((char, index) => (
           <span
             key={`${char}-${index}`}
@@ -575,24 +611,45 @@ export default function IntroSplash({
 
       <section className="intro-layer" aria-label="Intro Animation"></section>
 
-      <div className="app-shell" aria-hidden={!completed}>
+      <div className="utility-layer" aria-hidden={!showUi}>
+        <button
+          type="button"
+          className="lang-orb"
+          onClick={() => setLanguage((prev) => (prev === "ja" ? "en" : "ja"))}
+          aria-label={language === "ja" ? "Switch to English" : "日本語に切り替え"}
+          title={language === "ja" ? "Switch to English" : "日本語に切り替え"}
+        >
+          <span className="lang-orb-core" aria-hidden="true" />
+        </button>
+      </div>
+
+      <div className="app-shell" aria-hidden={!showUi}>
         <aside className="left-rail" aria-label="Main Menu">
-          <nav className="main-nav">
-            {SECTION_ITEMS.map((item) => (
+          <nav className="main-nav" aria-label="Section Navigation">
+            {SECTION_KEYS.map((item) => (
               <button
                 key={item}
                 type="button"
                 className={`menu-link ${activeSection === item ? "is-active" : ""}`}
-                onClick={() => setActiveSection(item)}
+                onClick={() => {
+                  setActiveSection(item);
+                  setHasOpenedGlass(true);
+                }}
               >
-                {item}
+                {SECTION_LABELS[item]}
               </button>
             ))}
           </nav>
         </aside>
 
         <section className="content-pane" aria-live="polite">
-          <h2>{activeSection}</h2>
+          {hasOpenedGlass ? (
+            <div key={activeSection} className="liquid-surface liquid-glass section-pane-reveal">
+              <div className="content-scroll">
+                <h2 className="glass-heading">{SECTION_LABELS[activeSection]}</h2>
+              </div>
+            </div>
+          ) : null}
         </section>
       </div>
     </div>
