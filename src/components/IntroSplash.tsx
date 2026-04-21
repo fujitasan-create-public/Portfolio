@@ -31,6 +31,7 @@ export default function IntroSplash({
   const [activeSection, setActiveSection] = useState<SectionKey>("home");
   const earthHostRef = useRef<HTMLDivElement | null>(null);
   const earthCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cursorStarLayerRef = useRef<HTMLDivElement | null>(null);
   const displayTitle = useMemo(() => title, [title]);
   const letters = useMemo(() => displayTitle.split(""), [displayTitle]);
 
@@ -54,6 +55,78 @@ export default function IntroSplash({
 
     return () => window.clearTimeout(timer);
   }, [completed]);
+
+  useEffect(() => {
+    const layer = cursorStarLayerRef.current;
+    if (!layer) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    if (prefersReducedMotion || !finePointer) {
+      return;
+    }
+
+    let lastX = -9999;
+    let lastY = -9999;
+    let lastSpawnAt = 0;
+    const timers = new Set<number>();
+
+    const spawnStar = (x: number, y: number) => {
+      const star = document.createElement("span");
+      star.className = "cursor-star";
+      const size = 7 + Math.random() * 10;
+      const driftX = (Math.random() - 0.5) * 42;
+      const driftY = -16 - Math.random() * 36;
+      const duration = 580 + Math.random() * 620;
+      const rotation = -32 + Math.random() * 64;
+
+      star.style.setProperty("--x", `${x}px`);
+      star.style.setProperty("--y", `${y}px`);
+      star.style.setProperty("--size", `${size}px`);
+      star.style.setProperty("--drift-x", `${driftX}px`);
+      star.style.setProperty("--drift-y", `${driftY}px`);
+      star.style.setProperty("--duration", `${duration}ms`);
+      star.style.setProperty("--rotation", `${rotation}deg`);
+
+      layer.appendChild(star);
+
+      const timerId = window.setTimeout(() => {
+        star.remove();
+        timers.delete(timerId);
+      }, duration + 70);
+      timers.add(timerId);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      const now = performance.now();
+      const dx = event.clientX - lastX;
+      const dy = event.clientY - lastY;
+      const movedEnough = dx * dx + dy * dy >= 90;
+      const enoughTimePassed = now - lastSpawnAt > 22;
+
+      if (!movedEnough || !enoughTimePassed) {
+        return;
+      }
+
+      spawnStar(event.clientX, event.clientY);
+      lastX = event.clientX;
+      lastY = event.clientY;
+      lastSpawnAt = now;
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      for (const timerId of timers) {
+        window.clearTimeout(timerId);
+      }
+      timers.clear();
+      layer.replaceChildren();
+    };
+  }, []);
 
   useEffect(() => {
     const host = earthHostRef.current;
@@ -338,9 +411,9 @@ export default function IntroSplash({
 
       const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
       const orbitMaterial = new THREE.LineBasicMaterial({
-        color: 0x8bb7ff,
+        color: 0x6f90bb,
         transparent: true,
-        opacity: 0.26
+        opacity: 0.12
       });
       const orbitLine = new THREE.LineLoop(orbitGeometry, orbitMaterial);
       root.add(orbitLine);
@@ -585,6 +658,7 @@ export default function IntroSplash({
           </div>
         </div>
       </div>
+      <div className="cursor-star-layer" ref={cursorStarLayerRef} aria-hidden="true" />
 
       <h1
         className={`intro-title intro-title-floating ${completed ? "title-docked" : ""}`}
