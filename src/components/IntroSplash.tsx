@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Aurora, particles as Particles } from "@appletosolutions/reactbits";
 import * as THREE from "three";
 
 type IntroSplashProps = {
   title?: string;
   durationMs?: number;
+  children?: ReactNode;
 };
 
 const DEFAULT_TITLE = "Fujita-create Portfolio";
@@ -18,10 +19,10 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   news: "News",
   contacts: "Contacts"
 };
-
 export default function IntroSplash({
   title = DEFAULT_TITLE,
-  durationMs = 2600
+  durationMs = 2600,
+  children
 }: IntroSplashProps) {
   const [completed, setCompleted] = useState(false);
   const [showUi, setShowUi] = useState(false);
@@ -646,7 +647,12 @@ export default function IntroSplash({
           {hasOpenedGlass ? (
             <div key={activeSection} className="liquid-surface liquid-glass section-pane-reveal">
               <div className="content-scroll">
-                <h2 className="glass-heading">{SECTION_LABELS[activeSection]}</h2>
+                <h2 className={`glass-heading ${activeSection === "home" ? "home-glass-heading" : ""}`}>
+                  {SECTION_LABELS[activeSection]}
+                </h2>
+                {activeSection === "home" ? (
+                  <div className="glass-body home-glass-body">{children}</div>
+                ) : null}
               </div>
             </div>
           ) : null}

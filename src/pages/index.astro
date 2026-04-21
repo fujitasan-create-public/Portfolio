@@ -1,5 +1,6 @@
 ---
 import IntroSplash from "../components/IntroSplash";
+import HomeIntro from "../components/HomeIntro.astro";
 import "../styles/global.css";
 ---
 
@@ -18,7 +19,9 @@ import "../styles/global.css";
   </head>
   <body>
     <main>
-      <IntroSplash client:load />
+      <IntroSplash client:load>
+        <HomeIntro />
+      </IntroSplash>
     </main>
   </body>
 </html>
