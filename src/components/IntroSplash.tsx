@@ -19,6 +19,13 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   news: "News",
   contacts: "Contacts"
 };
+const SECTION_SUMMARIES: Record<SectionKey, string> = {
+  home: "Profile and design policy are available in this section.",
+  skills: "Skills content is coming soon.",
+  works: "Works content is coming soon.",
+  news: "News content is coming soon.",
+  contacts: "Contact details are coming soon."
+};
 export default function IntroSplash({
   title = DEFAULT_TITLE,
   durationMs = 2600,
@@ -660,18 +667,14 @@ export default function IntroSplash({
       </div>
       <div className="cursor-star-layer" ref={cursorStarLayerRef} aria-hidden="true" />
 
-      <h1
-        className={`intro-title intro-title-floating ${completed ? "title-docked" : ""}`}
-        role="button"
-        tabIndex={0}
+      <h1 className="visually-hidden">{displayTitle}</h1>
+
+      <button
+        type="button"
+        className={`intro-title intro-title-floating intro-title-trigger ${completed ? "title-docked" : ""}`}
         aria-label="Reload page"
+        title="Reload page"
         onClick={() => window.location.reload()}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            window.location.reload();
-          }
-        }}
       >
         {letters.map((char, index) => (
           <span
@@ -682,53 +685,73 @@ export default function IntroSplash({
             {char}
           </span>
         ))}
-      </h1>
+      </button>
 
       <section className="intro-layer" aria-label="Intro Animation"></section>
 
-      <div className="utility-layer" aria-hidden={!showUi}>
+      <aside className="utility-layer" aria-hidden={!showUi} aria-label="Language Selector">
         <button
           type="button"
           className="lang-orb"
           onClick={() => setLanguage((prev) => (prev === "ja" ? "en" : "ja"))}
-          aria-label={language === "ja" ? "Switch to English" : "日本語に切り替え"}
-          title={language === "ja" ? "Switch to English" : "日本語に切り替え"}
+          aria-pressed={language === "en"}
+          aria-label={language === "ja" ? "Switch language to English" : "Switch language to Japanese"}
+          title={language === "ja" ? "Switch language to English" : "Switch language to Japanese"}
         >
           <span className="lang-orb-core" aria-hidden="true" />
+          <span className="lang-orb-text" aria-hidden="true">
+            {language === "ja" ? "JA" : "EN"}
+          </span>
         </button>
-      </div>
+      </aside>
 
-      <div className="app-shell" aria-hidden={!showUi}>
+      <div className="app-shell" role="region" aria-label="Portfolio Main Content" aria-hidden={!showUi}>
         <aside className="left-rail" aria-label="Main Menu">
           <nav className="main-nav" aria-label="Section Navigation">
-            {SECTION_KEYS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={`menu-link ${activeSection === item ? "is-active" : ""}`}
-                onClick={() => {
-                  setActiveSection(item);
-                  setHasOpenedGlass(true);
-                }}
-              >
-                {SECTION_LABELS[item]}
-              </button>
-            ))}
+            <ul className="main-nav-list">
+              {SECTION_KEYS.map((item) => (
+                <li key={item}>
+                  <button
+                    type="button"
+                    className={`menu-link ${activeSection === item ? "is-active" : ""}`}
+                    aria-current={activeSection === item ? "page" : undefined}
+                    aria-controls={`panel-${item}`}
+                    onClick={() => {
+                      setActiveSection(item);
+                      setHasOpenedGlass(true);
+                    }}
+                  >
+                    {SECTION_LABELS[item]}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </nav>
         </aside>
 
-        <section className="content-pane" aria-live="polite">
+        <section className="content-pane" aria-live="polite" aria-atomic="true" aria-label="Section Content">
           {hasOpenedGlass ? (
-            <div key={activeSection} className="liquid-surface liquid-glass section-pane-reveal">
+            <article
+              key={activeSection}
+              id={`panel-${activeSection}`}
+              className="liquid-surface liquid-glass section-pane-reveal"
+              role="region"
+              aria-labelledby={`section-title-${activeSection}`}
+            >
               <div className="content-scroll">
-                <h2 className={`glass-heading ${activeSection === "home" ? "home-glass-heading" : ""}`}>
+                <h2
+                  id={`section-title-${activeSection}`}
+                  className={`glass-heading ${activeSection === "home" ? "home-glass-heading" : ""}`}
+                >
                   {SECTION_LABELS[activeSection]}
                 </h2>
                 {activeSection === "home" ? (
-                  <div className="glass-body home-glass-body">{children}</div>
-                ) : null}
+                  <section className="glass-body home-glass-body">{children}</section>
+                ) : (
+                  <p className="glass-body">{SECTION_SUMMARIES[activeSection]}</p>
+                )}
               </div>
-            </div>
+            </article>
           ) : null}
         </section>
       </div>

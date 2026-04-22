@@ -547,6 +547,21 @@ body {
   letter-spacing: 0.03em;
 }
 
+.intro-title-trigger {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+
+.intro-title-trigger:focus-visible,
+.lang-orb:focus-visible,
+.menu-link:focus-visible {
+  outline: 2px solid rgba(145, 216, 255, 0.95);
+  outline-offset: 4px;
+}
+
 .intro-title-floating {
   position: absolute;
   z-index: 6;
@@ -720,6 +735,12 @@ body {
   gap: 0.55rem;
 }
 
+.main-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .liquid-glass {
   position: relative;
   background: var(--glass-bg);
@@ -821,8 +842,38 @@ body {
   gap: 1.1em;
 }
 
+.home-intro-copy h3,
+.home-intro-copy h4 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-family: "Orbitron", "Space Grotesk", "Segoe UI", sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.home-intro-copy h3 {
+  font-size: clamp(1.1rem, 2vw, 1.7rem);
+  margin-bottom: 0.45rem;
+}
+
+.home-intro-copy h4 {
+  font-size: clamp(0.98rem, 1.5vw, 1.2rem);
+  margin-bottom: 0.32rem;
+}
+
 .home-intro-copy p {
   margin: 0;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .section-pane-reveal {
